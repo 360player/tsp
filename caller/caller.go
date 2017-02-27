@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"encoding/json"
 	"errors"
+	"fmt"
 	"io/ioutil"
 	"net/http"
 )
@@ -16,6 +17,11 @@ var apiKey string
 var client *http.Client
 
 var InvalidAuthError = errors.New("Auth token is invalid.")
+
+type QueryParam struct {
+	Key   string
+	Value string
+}
 
 func Post(ep string, data interface{}) ([]byte, error) {
 	jsonData, _ := json.Marshal(data)
@@ -41,7 +47,7 @@ func Post(ep string, data interface{}) ([]byte, error) {
 	return result, nil
 }
 
-func Get(ep string) ([]byte, error) {
+func Get(ep string, queryParams ...QueryParam) ([]byte, error) {
 	request, _ := http.NewRequest("GET", buildUrl(ep), nil)
 
 	request.Header.Add("Content-Type", "application/json")
@@ -49,6 +55,18 @@ func Get(ep string) ([]byte, error) {
 	if apiKey != "" {
 		request.Header.Add("Authorization", "Bearer "+apiKey)
 	}
+
+	if len(queryParams) > 0 {
+		q := request.URL.Query()
+
+		for _, param := range queryParams {
+			q.Add(param.Key, param.Value)
+		}
+
+		request.URL.RawQuery = q.Encode()
+	}
+
+	fmt.Println(request.URL.String())
 
 	resp, respErr := client.Do(request)
 

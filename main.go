@@ -1,6 +1,7 @@
 package main
 
 import (
+	"flag"
 	"fmt"
 	"github.com/360player/tsp/caller"
 	"github.com/360player/tsp/commands"
@@ -32,9 +33,14 @@ func handleUsers() {
 		return
 	}
 
+	listFlagSet := flag.NewFlagSet("user list", flag.ContinueOnError)
+	var page = listFlagSet.String("page", "1", "")
+
 	switch os.Args[2] {
 	case "list":
-		userResponse, userError := caller.Get(caller.EP_USER_LIST)
+		listFlagSet.Parse(os.Args[3:])
+
+		userResponse, userError := caller.Get(caller.EP_USER_LIST, caller.QueryParam{"page", *page})
 
 		if userError != nil {
 			panic(userError)
