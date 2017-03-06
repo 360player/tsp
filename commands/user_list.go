@@ -2,6 +2,7 @@ package commands
 
 import (
 	"encoding/json"
+	"github.com/360player/tsp/caller"
 )
 
 type User struct {
@@ -17,6 +18,16 @@ type User struct {
 type UserList struct {
 	Collection
 	Users []User `json:"records"`
+}
+
+func (userList *UserList) List(page string) {
+	userResponse, userError := caller.Get(caller.EP_USER_LIST, caller.QueryParam{"page", page})
+
+	if userError != nil {
+		panic(userError)
+	}
+
+	userList.Unmarshal(userResponse)
 }
 
 func (userList *UserList) Unmarshal(jsonData []byte) {

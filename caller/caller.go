@@ -4,13 +4,17 @@ import (
 	"bytes"
 	"encoding/json"
 	"errors"
-	"fmt"
 	"io/ioutil"
 	"net/http"
 )
 
 const EP_AUTH = "/v1/auth"
 const EP_USER_LIST = "/v1/users"
+const EP_RATING_ITEMS = "/v1/rating-items"
+const EP_POSITIONS = "/v1/positions"
+const EP_USER = "/v1/users/%d"
+const EP_GROUP = "/v1/groups/%d"
+const EP_USER_RATINGS = "/v1/users/%d/ratings"
 
 var baseUrl string
 var apiKey string
@@ -40,6 +44,10 @@ func Post(ep string, data interface{}) ([]byte, error) {
 		return nil, respErr
 	}
 
+	if resp.StatusCode == 401 {
+		return nil, InvalidAuthError
+	}
+
 	defer resp.Body.Close()
 
 	result, _ := ioutil.ReadAll(resp.Body)
@@ -66,16 +74,22 @@ func Get(ep string, queryParams ...QueryParam) ([]byte, error) {
 		request.URL.RawQuery = q.Encode()
 	}
 
-	fmt.Println(request.URL.String())
-
 	resp, respErr := client.Do(request)
 
 	if respErr != nil {
 		return nil, respErr
 	}
 
+	if resp.StatusCode == 401 {
+		return nil, InvalidAuthError
+	}
+
 	defer resp.Body.Close()
 	result, _ := ioutil.ReadAll(resp.Body)
+
+	if resp.StatusCode != 200 {
+		return result, errors.New(resp.Status)
+	}
 
 	return result, nil
 }
