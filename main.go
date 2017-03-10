@@ -20,8 +20,11 @@ func handleConfig() {
 	appConfig.SetApiUrl()
 	caller.SetBaseUrl(appConfig.ApiUrl)
 
+	appConfig.SetApiKey()
+	caller.SetApiKey(appConfig.ApiKey)
+
 	appConfig.Auth()
-	caller.SetAuth(appConfig.ApiKey)
+	caller.SetAuth(appConfig.AuthToken)
 }
 
 func handleUsers() {
@@ -72,16 +75,20 @@ func main() {
 	appConfig = &config.Config{}
 	appConfig.Load()
 
-	if appConfig.ApiUrl == "" || appConfig.ApiKey == "" {
+	if appConfig.ApiUrl == "" {
 		handleConfig()
 	}
 
 	caller.SetBaseUrl(appConfig.ApiUrl)
-	caller.SetAuth(appConfig.ApiKey)
+	caller.SetAuth(appConfig.AuthToken)
+	caller.SetApiKey(appConfig.ApiKey)
 
 	switch os.Args[1] {
 	case "login":
 		appConfig.Auth()
+		break
+	case "api-key":
+		appConfig.SetApiKey()
 		break
 	case "config":
 		handleConfig()

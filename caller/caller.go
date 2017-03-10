@@ -17,6 +17,7 @@ const EP_GROUP = "/v1/groups/%d"
 const EP_USER_RATINGS = "/v1/users/%d/ratings"
 
 var baseUrl string
+var authToken string
 var apiKey string
 var client *http.Client
 
@@ -27,16 +28,23 @@ type QueryParam struct {
 	Value string
 }
 
+func addHeaders(request *http.Request) {
+	request.Header.Add("Content-Type", "application/json")
+
+	if authToken != "" {
+		request.Header.Add("Authorization", "Bearer "+authToken)
+	}
+
+	if apiKey != "" {
+		request.Header.Add("X-API-Key", apiKey)
+	}
+}
+
 func Post(ep string, data interface{}) ([]byte, error) {
 	jsonData, _ := json.Marshal(data)
 
 	request, _ := http.NewRequest("POST", buildUrl(ep), bytes.NewReader(jsonData))
-
-	request.Header.Add("Content-Type", "application/json")
-
-	if apiKey != "" {
-		request.Header.Add("Authorization", "Bearer "+apiKey)
-	}
+	addHeaders(request)
 
 	resp, respErr := client.Do(request)
 
@@ -57,12 +65,7 @@ func Post(ep string, data interface{}) ([]byte, error) {
 
 func Get(ep string, queryParams ...QueryParam) ([]byte, error) {
 	request, _ := http.NewRequest("GET", buildUrl(ep), nil)
-
-	request.Header.Add("Content-Type", "application/json")
-
-	if apiKey != "" {
-		request.Header.Add("Authorization", "Bearer "+apiKey)
-	}
+	addHeaders(request)
 
 	if len(queryParams) > 0 {
 		q := request.URL.Query()
@@ -94,7 +97,11 @@ func Get(ep string, queryParams ...QueryParam) ([]byte, error) {
 	return result, nil
 }
 
-func SetAuth(key string) {
+func SetAuth(token string) {
+	authToken = token
+}
+
+func SetApiKey(key string) {
 	apiKey = key
 }
 

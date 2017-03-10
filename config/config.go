@@ -17,8 +17,9 @@ var reader *bufio.Reader
 const CONFIG_FILE_NAME = "~/.tsp.json"
 
 type Config struct {
-	ApiUrl string `json:"apiUrl"`
-	ApiKey string `json:"apiKey"`
+	ApiUrl    string `json:"apiUrl"`
+	AuthToken string `json:"authToken"`
+	ApiKey    string `json:"apiKey"`
 }
 
 type userAuth struct {
@@ -66,7 +67,17 @@ func (config *Config) Auth() {
 	var authData *authResponse
 	json.Unmarshal(resp, &authData)
 
-	config.ApiKey = authData.Token
+	config.AuthToken = authData.Token
+	config.Write()
+}
+
+func (config *Config) SetApiKey() {
+	fmt.Print("360Player API Key: ")
+
+	reader = bufio.NewReader(os.Stdin)
+	url, _ := reader.ReadString('\n')
+
+	config.ApiKey = strings.TrimRight(url, "\n")
 	config.Write()
 }
 
