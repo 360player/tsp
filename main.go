@@ -66,6 +66,20 @@ func handleRatings() {
 	}
 }
 
+func handleEvents() {
+	if len(os.Args) < 3 || os.Args[2] == "help" {
+		//@todo Print ratings help
+		return
+	}
+
+	switch os.Args[2] {
+	case "create":
+		event := &commands.Event{}
+		event.Create()
+		break
+	}
+}
+
 func main() {
 	if len(os.Args) == 1 || os.Args[1] == "help" {
 		printHelp()
@@ -98,6 +112,9 @@ func main() {
 		break
 	case "ratings":
 		handleRatings()
+		break
+	case "events":
+		handleEvents()
 		break
 	}
 }

@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"encoding/json"
 	"errors"
+	"fmt"
 	"io/ioutil"
 	"net/http"
 )
@@ -52,13 +53,21 @@ func Post(ep string, data interface{}) ([]byte, error) {
 		return nil, respErr
 	}
 
+	defer resp.Body.Close()
+
+	result, _ := ioutil.ReadAll(resp.Body)
+
 	if resp.StatusCode == 401 {
 		return nil, InvalidAuthError
 	}
 
-	defer resp.Body.Close()
+	if resp.StatusCode != 200 && resp.StatusCode != 201 {
+		resultMap := make(map[string]interface{})
 
-	result, _ := ioutil.ReadAll(resp.Body)
+		_ = json.Unmarshal(result, &resultMap)
+
+		fmt.Println(resultMap)
+	}
 
 	return result, nil
 }

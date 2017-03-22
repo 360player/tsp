@@ -48,8 +48,6 @@ type position struct {
 	LongName string `json:"longName"`
 }
 
-var reader *bufio.Reader
-
 // Fetch rating items from the API and loop through them all.
 // A value between 1 and 100 is required for input.
 // Values above 100 will be set 100.
